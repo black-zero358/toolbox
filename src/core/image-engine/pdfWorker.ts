@@ -1,49 +1,59 @@
+/**
+ * PDF 转换引擎
+ * 使用 pdfjs-dist 库在浏览器中解析 PDF 文件并将其渲染为图片
+ */
 import * as pdfjsLib from 'pdfjs-dist'
 
 export interface PdfConvertOptions {
   format: 'webp' | 'jpeg' | 'png'
   quality: number
-  scale: number
-  maxWidth?: number
-  stitchLongImage?: boolean
+  scale: number             // 渲染像素倍率 (DPI 缩放)
+  maxWidth?: number         // 最大宽度限制
+  stitchLongImage?: boolean // 是否拼接为长图
 }
 
 export interface PdfConvertedPage {
-  pageNumber: number // In long image mode, this acts as the "part" number
+  pageNumber: number // 对应页码（或在长图模式中的分段序号）
   url: string
   blob: Blob
   width: number
   height: number
 }
 
-// Ensure the worker is configured properly for Vite setup
+// 必须正确配置 PDF.js 的 Worker 路径，否则无法解析 PDF
+// 这里利用 Vite 的 URL 构造函数指向 node_modules 中的 worker 文件
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.mjs',
   import.meta.url
 ).toString()
 
-const MAX_CANVAS_HEIGHT = 30000 // Safe limit for browsers
+// 浏览器 Canvas 的最大高度限制（约 3w 像素），超过此值可能报错或黑屏
+const MAX_CANVAS_HEIGHT = 30000 
 
+/**
+ * 处理 PDF 文件转换的核心函数
+ */
 export async function processPdfFile(
   file: File,
   options: PdfConvertOptions,
   onProgress: (percent: number) => void
 ): Promise<PdfConvertedPage[]> {
+  // 1. 加载 PDF 文档
   const arrayBuffer = await file.arrayBuffer()
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer })
   const pdfDoc = await loadingTask.promise
 
   const totalPages = pdfDoc.numPages
   const results: PdfConvertedPage[] = []
-
   const mimeType = `image/${options.format}`
 
-  // Standard non-stitch mode
+  // 模式 A：标准模式（每一页转为一张独立图片）
   if (!options.stitchLongImage) {
     for (let i = 1; i <= totalPages; i++) {
-      const page = await pdfDoc.getPage(i)
-      let viewport = page.getViewport({ scale: options.scale })
+      const page = await pdfDoc.getPage(i) // 获取特定页码的对象
+      let viewport = page.getViewport({ scale: options.scale }) // 计算渲染视野
       
+      // 如果超过最大宽度限制，则重新计算视野缩放
       if (options.maxWidth && viewport.width > options.maxWidth) {
         const ratio = options.maxWidth / viewport.width
         viewport = page.getViewport({ scale: options.scale * ratio })
@@ -56,14 +66,17 @@ export async function processPdfFile(
       canvas.width = viewport.width
       canvas.height = viewport.height
 
+      // 处理透明度
       if (options.format !== 'png') {
         ctx.fillStyle = '#FFFFFF'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       }
 
+      // 2. 将 PDF 页面渲染到 Canvas 上
       // @ts-ignore
       await page.render({ canvasContext: ctx, viewport }).promise
 
+      // 3. 导出为 Blob
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => b ? resolve(b) : reject(new Error('toBlob failed')), mimeType, options.quality)
       })
@@ -75,15 +88,16 @@ export async function processPdfFile(
         width: canvas.width,
         height: canvas.height
       })
-      canvas.width = 0; canvas.height = 0; // Free memory
-      onProgress(Math.round((i / totalPages) * 100))
-      await new Promise(r => setTimeout(r, 10))
+      
+      canvas.width = 0; canvas.height = 0; // 手动清理 canvas 绘图缓存
+      onProgress(Math.round((i / totalPages) * 100)) // 通知外部进度
+      await new Promise(r => setTimeout(r, 10)) // 短暂让出主线程
     }
     return results
   }
 
-  // --- STITCH LONG IMAGE MODE ---
-  // Pass 1: Gather dimensions
+  // 模式 B：长图拼接模式
+  // 第一步：收集所有页面的尺寸信息
   const pagesInfo = []
   for (let i = 1; i <= totalPages; i++) {
     const page = await pdfDoc.getPage(i)
@@ -94,7 +108,8 @@ export async function processPdfFile(
     pagesInfo.push({ page, viewport, originalIndex: i })
   }
 
-  // Pass 2: Chunk by height limit
+  // 第二步：根据高度限制进行分段（Chunking）
+  // 浏览器 Canvas 有最大高度，所以超长 PDF 会被切成几段长图
   const chunks: typeof pagesInfo[] = []
   let currentChunk: typeof pagesInfo = []
   let currentH = 0
@@ -110,7 +125,7 @@ export async function processPdfFile(
   }
   if (currentChunk.length > 0) chunks.push(currentChunk)
 
-  // Pass 3: Render chunks
+  // 第三步：渲染每一个分段的“巨型 Canvas”
   let globalProcessed = 0
   for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
     const chunk = chunks[chunkIdx]
@@ -130,7 +145,7 @@ export async function processPdfFile(
 
     let cursorY = 0
     for (const info of chunk) {
-      // Render to exact sized small canvas to avoid displacement bugs
+      // 这里的策略是先渲染小页 Canvas，再画到巨型 Canvas 上，这样定位更稳定
       const smallCanvas = document.createElement('canvas')
       smallCanvas.width = info.viewport.width
       smallCanvas.height = info.viewport.height
@@ -144,12 +159,12 @@ export async function processPdfFile(
       // @ts-ignore
       await info.page.render({ canvasContext: smallCtx, viewport: info.viewport }).promise
 
-      // Draw onto mega centered horizontally or flush left? Let's do centered
-      const offsetX = (chunkWidth - info.viewport.width) / 2
+      // 将渲染好的页面绘制到长图的对应纵坐标位置
+      const offsetX = (chunkWidth - info.viewport.width) / 2 // 居中对齐
       megaCtx.drawImage(smallCanvas, offsetX, cursorY)
       cursorY += info.viewport.height
 
-      smallCanvas.width = 0; smallCanvas.height = 0; // Free small
+      smallCanvas.width = 0; smallCanvas.height = 0; // 清理
       
       globalProcessed++
       onProgress(Math.round((globalProcessed / totalPages) * 100))
@@ -161,7 +176,7 @@ export async function processPdfFile(
     })
 
     results.push({
-      pageNumber: chunkIdx + 1, // acts as "part"
+      pageNumber: chunkIdx + 1,
       url: URL.createObjectURL(blob),
       blob,
       width: chunkWidth,

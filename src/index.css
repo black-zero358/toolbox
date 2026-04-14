@@ -1,7 +1,13 @@
+/* 导入 Tailwind CSS 核心库 */
 @import "tailwindcss";
 
+/* 定义暗黑模式变体，当父元素带有 .dark 类时生效 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* 
+ * 自定义主题配置
+ * 将 CSS 变量映射到 Tailwind 的颜色名称中，方便在 HTML/JSX 中直接使用
+ */
 @theme {
   --color-border: var(--border);
   --color-foreground: var(--foreground);
@@ -9,27 +15,33 @@
 }
 
 @layer base {
+  /* 默认配置（明亮模式） */
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --border: #e2e8f0;
+    --background: #f8fafc; /* 背景颜色：浅灰色 */
+    --foreground: #0f172a; /* 文字颜色：深蓝色 */
+    --border: #e2e8f0;      /* 边框颜色 */
   }
 
+  /* 暗黑模式配置 */
   .dark {
-    --background: #030712;
-    --foreground: #f8fafc;
-    --border: #1e293b;
+    --background: #030712; /* 背景颜色：深黑色 */
+    --foreground: #f8fafc; /* 文字颜色：浅白色 */
+    --border: #1e293b;      /* 边框颜色 */
   }
 }
 
 @layer base {
+  /* 基础元素样式重置 */
   * {
-    @apply border-border;
+    @apply border-border; /* 默认所有元素都使用主题定义的边框色 */
   }
+  
   body {
+    /* 应用全局背景色、文字颜色，并开启抗锯齿 */
     @apply bg-background text-foreground antialiased selection:bg-indigo-500/30;
   }
   
+  /* 自定义滚动条样式 (适用于 Webkit 浏览器如 Chrome/Edge/Safari) */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
