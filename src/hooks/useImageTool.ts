@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { convertRawImage, type ImageConvertOptions } from '../core/image-engine/imageWorker'
 import { processPdfFile, type PdfConvertedPage } from '../core/image-engine/pdfWorker'
-import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
 export type ProcessItemStatus = 'idle' | 'processing' | 'done' | 'error'
@@ -19,7 +18,7 @@ export interface AppProcessItem {
 export function useImageTool() {
   const [items, setItems] = useState<AppProcessItem[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [options, setOptions] = useState<ImageConvertOptions & { scale: number }>({
+  const [options, setOptions] = useState<ImageConvertOptions & { scale: number, stitchLongImage?: boolean }>({
     format: 'webp',
     quality: 0.85,
     scale: 2 // Only for PDF rendering
@@ -107,36 +106,69 @@ export function useImageTool() {
     setIsProcessing(false)
   }, [items, options])
 
+  const [predictedSize, setPredictedSize] = useState<number | null>(null)
+
+  // Debounced size prediction
+  useEffect(() => {
+    let active = true
+    const calculatePrediction = async () => {
+      const idleItems = items.filter(i => i.status === 'idle')
+      if (idleItems.length === 0) {
+        setPredictedSize(null)
+        return
+      }
+      
+      const totalIdleSize = idleItems.reduce((acc, i) => acc + i.file.size, 0)
+      
+      // Calculate conversion ratio using the first image as a proxy
+      const firstImage = idleItems.find(i => i.type === 'image')
+      let ratio = 1
+      if (firstImage) {
+        try {
+          // Shadow conversion to determine accurate ratio
+          const res = await convertRawImage(firstImage.file, options)
+          ratio = res.blob.size / firstImage.file.size
+          if (res.url) URL.revokeObjectURL(res.url)
+        } catch {
+          // Fallback heuristic if shadow conversion fails
+          ratio = options.quality * (options.format === 'webp' ? 0.6 : 0.8)
+        }
+      } else {
+        // For purely PDF queues, guessing is safer than parsing whole PDFs just for size estimate
+        ratio = options.quality * (options.format === 'webp' ? 0.6 : 0.8)
+      }
+      
+      if (active) {
+        setPredictedSize(totalIdleSize * ratio)
+      }
+    }
+    
+    // 500ms debounce
+    const tid = setTimeout(calculatePrediction, 500)
+    return () => {
+      active = false
+      clearTimeout(tid)
+    }
+  }, [items, options])
+
   const downloadAll = useCallback(async () => {
     const doneItems = items.filter(i => i.status === 'done' && i.results.length > 0)
     if (doneItems.length === 0) return
 
-    // If exactly one image is generated from one item
-    if (doneItems.length === 1 && doneItems[0].results.length === 1) {
-      const single = doneItems[0].results[0]
-      const originalName = doneItems[0].file.name.substring(0, doneItems[0].file.name.lastIndexOf('.')) || doneItems[0].file.name
-      saveAs(single.blob, `${originalName}-converted.${options.format}`)
-      return
-    }
-
-    // Multiple images -> Zip
-    const zip = new JSZip()
-    const folder = zip.folder(`converted_images`)
-    if (!folder) return
-
-    doneItems.forEach(item => {
+    // Loop and directly saveAs to skip packing JSZip per user request
+    for (const item of doneItems) {
       const originalName = item.file.name.substring(0, item.file.name.lastIndexOf('.')) || item.file.name
       if (item.results.length === 1) {
-        folder.file(`${originalName}.${options.format}`, item.results[0].blob)
+        saveAs(item.results[0].blob, `${originalName}-converted.${options.format}`)
       } else {
+        // Multi-page PDF output
         item.results.forEach(res => {
-          folder.file(`${originalName}_page-${res.pageNumber}.${options.format}`, res.blob)
+          saveAs(res.blob, `${originalName}_page-${res.pageNumber}.${options.format}`)
         })
       }
-    })
-
-    const content = await zip.generateAsync({ type: 'blob' })
-    saveAs(content, `toolbox-converted-images.zip`)
+      // slight delay to prevent browser crash / rapid fire blocking
+      await new Promise(r => setTimeout(r, 200))
+    }
   }, [items, options.format])
 
   return {
@@ -144,6 +176,7 @@ export function useImageTool() {
     options,
     setOptions,
     isProcessing,
+    predictedSize,
     addFiles,
     removeItem,
     clearAllItems,
