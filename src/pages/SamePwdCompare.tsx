@@ -56,7 +56,7 @@ export default function SamePwdCompare() {
       )}
 
       {stats.totalEntries > 0 && !loading && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex divide-x divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-2">
+        <motion.div initial={{ y: 10 }} animate={{ y: 0 }} className="flex divide-x divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-2">
            <div className="px-6 py-3 items-center justify-center flex flex-col">
              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">扫描总数</span>
              <span className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">{stats.totalEntries}</span>
@@ -75,8 +75,8 @@ export default function SamePwdCompare() {
           {duplicates.map((group, idx) => (
             <motion.div 
               key={group.password}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 10 }}
+              animate={{ y: 0 }}
               transition={{ delay: idx * 0.05 }}
               className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >

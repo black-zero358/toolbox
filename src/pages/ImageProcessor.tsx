@@ -23,8 +23,8 @@ export default function ImageProcessor() {
       
       {/* 左侧控制栏 */}
       <motion.div 
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ x: -20 }}
+        animate={{ x: 0 }}
         className="w-full xl:w-[320px] shrink-0 sticky top-24"
       >
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
@@ -130,8 +130,8 @@ export default function ImageProcessor() {
       </motion.div>
       {/* 右侧工作区 */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
         transition={{ delay: 0.1 }}
         className="flex-1 w-full space-y-6"
       >
@@ -249,8 +249,8 @@ export default function ImageProcessor() {
 
       {/* 右侧操作栏 */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ x: 20 }}
+        animate={{ x: 0 }}
         transition={{ delay: 0.2 }}
         className="w-full xl:w-[320px] shrink-0 sticky top-24"
       >

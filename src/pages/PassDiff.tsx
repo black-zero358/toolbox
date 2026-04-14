@@ -117,7 +117,7 @@ export default function PassDiff() {
 
       {oldFile && newFile && results.length === 0 && !loading && (
         <motion.button 
-          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ y: -10 }} animate={{ y: 0 }}
           onClick={handleCompare}
           className="w-full h-12 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-2xl shadow-lg border-b-4 border-indigo-700 flex items-center justify-center gap-2 transform active:border-b-0 active:translate-y-1 transition-all"
         >
@@ -132,7 +132,7 @@ export default function PassDiff() {
       )}
 
       {results.length > 0 && (
-        <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+        <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
            <div className="flex bg-slate-50 dark:bg-slate-950 p-4 justify-around text-center border-b border-border text-sm">
              <div className="flex flex-col"><span className="text-slate-400 font-bold uppercase text-[10px]">旧版数据</span><span className="font-mono font-bold text-slate-700 dark:text-slate-200">{stats.oldTotal}</span></div>
              <div className="flex flex-col"><span className="text-slate-400 font-bold uppercase text-[10px]">新版数据</span><span className="font-mono font-bold text-slate-700 dark:text-slate-200">{stats.newTotal}</span></div>
@@ -152,7 +152,7 @@ export default function PassDiff() {
                rowComponent={renderRow}
              />
            </div>
-        </motion.div>
+        </div>
       )}
 
     </div>

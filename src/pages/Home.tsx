@@ -38,28 +38,23 @@ export default function Home() {
       <div className="text-center space-y-4 pt-10 pb-6">
         <motion.h1 
           className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           全能高雅的 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">本地工具箱</span>
         </motion.h1>
-        <motion.p 
-          className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
           无需网络上传，所有的强悍算力都在您的浏览器内瞬间释放。极致呵护隐私，拒绝云端隐患。
-        </motion.p>
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tools.map((tool, index) => (
           <motion.div
             key={tool.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 * index }}
           >
             <Link 
@@ -94,15 +89,10 @@ export default function Home() {
       </div>
       
       {/* 未来保留项预留 */}
-      <motion.div 
-        className="w-full border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-600"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
+      <div className="w-full border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-600">
         <FileKey className="w-8 h-8 mb-3 opacity-50" />
         <p className="font-medium text-sm">更多工具模块正在开发中...</p>
-      </motion.div>
+      </div>
     </div>
   )
 }
