@@ -1,73 +1,37 @@
-# React + TypeScript + Vite
+# 🧰 统一前端极客工具箱 (Zero Toolbox)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+这是一个基于本地浏览器环境的无服务、纯前端、隐私绝对安全的极客工具合集。采用现代化的 React + Vite 构建，并完全由前端完成资源密集型的计算任务。
 
-Currently, two official plugins are available:
+## 🌟 核心工具模块
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **超级图像工坊**: 支持 PNG / JPEG / WEBP 等格式的高速相互独立转换与按需压缩。不仅能批量处理图片，对于多页 PDF 更是支持高清解析，并能将所有分页首尾相接进行「**垂直无缝长图拼接**」。系统内置浏览器 3 万像素极值守护，超过极限将智能帮您进行分段截断切片。
+- **性能体积预估雷达**: 在图像工坊中拉动控制杆调参时，无需等待漫长的全量渲染，应用会在隐秘空间提取队列首件内容进行一次“影子试算”，并极速反哺「预测产出总体积」。
+- **高频密码检测雷达 (SamePwdCompare)**: 纯本地环境暴力解析复杂的 CSV 密码文件集，并一键揪出高风险雷同重复密码。
+- **密码本差异比对仪 (PassDiff)**: 对两份新旧 CSV 数据进行精确的「交叉验证并集对比分析」，搭配底层的 `react-window` 虚拟列表，无论数据多少屏，都如丝般顺滑。
 
-## React Compiler
+## 🛡 纯粹的隐私与效率保证
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+本项目全面信奉 **Local First**（极致的本地优先）原则。所有的文件拆解、PDF 渲染以及长卷轴计算皆交由您的系统级浏览器执行！没有 API 请求交互耗时，更不必担心敏感信息泄露至云端。为了最爽快的出图体验，最新的底层系统甚至舍弃了沉重的 JSZip 全量打包入参，而是改为更灵动的多线并发直落浏览器本地保护硬盘！
 
-## Expanding the ESLint configuration
+## 🛠 现代化前沿技术栈
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 💎 **React 19** + **TypeScript**
+- ⚡️ **Vite 8.0**
+- 🎨 **Tailwind CSS v4** 带来顶级轻量化系统配置，全面原生支持黑夜模式双向主题无缝翻转。
+- ✨ 动效与 UI 基于 **Framer Motion** 以及 **Lucide React** 图标库。
+- ⚙️ **核心分析引擎**：`pdfjs-dist`、`react-window`、`papaparse` 等。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 快速启动
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. **配置依赖**（推荐使用 `pnpm`）：
+   ```bash
+   pnpm install
+   ```
+2. **点燃开发核心**：
+   ```bash
+   pnpm run dev
+   ```
+3. **打包编译**：
+   ```bash
+   pnpm build
+   ```
