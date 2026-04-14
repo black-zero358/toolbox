@@ -19,13 +19,13 @@ export default function ImageProcessor() {
   const hasPdf = items.some(i => i.type === 'pdf')
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full max-w-7xl mx-auto items-start">
+    <div className="flex flex-col xl:flex-row gap-6 h-full max-w-[90rem] mx-auto items-start">
       
       {/* 左侧控制栏 */}
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="w-full lg:w-[320px] shrink-0 space-y-6 sticky top-24"
+        className="w-full xl:w-[320px] shrink-0 sticky top-24"
       >
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
           <div className="flex items-center gap-3 mb-6">
@@ -127,48 +127,7 @@ export default function ImageProcessor() {
              )}
           </div>
         </div>
-
-        {/* Action Panel */}
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white">
-           <div className="mb-4 text-sm font-medium text-blue-100 bg-blue-950/20 w-fit px-3 py-1 rounded-full border border-blue-400/20 flex items-center gap-2">
-             <Sparkles className="w-3.5 h-3.5" />
-             纯本地处理，拒绝隐私上传
-           </div>
-           
-           <div className="space-y-3 mt-6">
-             {predictedSize !== null && !isProcessing && hasItems && !isAllDone && (
-               <div className="animate-pulse flex items-center justify-center gap-2 text-xs font-medium bg-blue-900/30 text-blue-200 py-2 rounded-lg border border-blue-400/20 shadow-inner">
-                 <Zap className="w-3.5 h-3.5 text-yellow-400" />
-                 <span>预测产出总体积: <strong className="text-white">{(predictedSize / 1024 / 1024).toFixed(2)} MB</strong></span>
-               </div>
-             )}
-
-             <button 
-               onClick={processAll} 
-               disabled={!hasItems || isProcessing}
-               className={cn(
-                 "w-full h-12 flex items-center justify-center gap-2 font-bold rounded-xl transition-all",
-                 isProcessing ? "bg-white/20 text-white/50 cursor-not-allowed" : "bg-white text-blue-600 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/10"
-               )}
-             >
-               {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /> 处理中...</> : <><PlayCircle className="w-5 h-5" /> 一键转换全部</>}
-             </button>
-
-             <AnimatePresence>
-               {isAllDone && (
-                 <motion.button 
-                   initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: '3rem' }} exit={{ opacity: 0, height: 0 }}
-                   onClick={downloadAll}
-                   className="w-full bg-blue-950/40 hover:bg-blue-950/60 text-white font-medium flex items-center justify-center gap-2 rounded-xl transition-colors border border-blue-400/30 backdrop-blur-md"
-                 >
-                   <Download className="w-4 h-4" /> 批量下载转换结果
-                 </motion.button>
-               )}
-             </AnimatePresence>
-           </div>
-        </div>
       </motion.div>
-
       {/* 右侧工作区 */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -286,6 +245,53 @@ export default function ImageProcessor() {
               ))}
             </AnimatePresence>
          </div>
+      </motion.div>
+
+      {/* 右侧操作栏 */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        className="w-full xl:w-[320px] shrink-0 sticky top-24"
+      >
+        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white">
+           <div className="mb-4 text-sm font-medium text-blue-100 bg-blue-950/20 w-fit px-3 py-1 rounded-full border border-blue-400/20 flex items-center gap-2">
+             <Sparkles className="w-3.5 h-3.5" />
+             纯本地处理，拒绝隐私上传
+           </div>
+           
+           <div className="space-y-3 mt-6">
+             {predictedSize !== null && !isProcessing && hasItems && !isAllDone && (
+               <div className="animate-pulse flex items-center justify-center gap-2 text-xs font-medium bg-blue-900/30 text-blue-200 py-2 rounded-lg border border-blue-400/20 shadow-inner">
+                 <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                 <span>预测产出总体积: <strong className="text-white">{(predictedSize / 1024 / 1024).toFixed(2)} MB</strong></span>
+               </div>
+             )}
+
+             <button 
+               onClick={processAll} 
+               disabled={!hasItems || isProcessing}
+               className={cn(
+                 "w-full h-12 flex items-center justify-center gap-2 font-bold rounded-xl transition-all",
+                 isProcessing ? "bg-white/20 text-white/50 cursor-not-allowed" : "bg-white text-blue-600 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/10"
+               )}
+             >
+               {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /> 处理中...</> : <><PlayCircle className="w-5 h-5" /> 一键转换全部</>}
+             </button>
+
+             <AnimatePresence>
+               {isAllDone && (
+                 <motion.button 
+                   initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: '3rem' }} exit={{ opacity: 0, height: 0 }}
+                   onClick={downloadAll}
+                   className="w-full bg-blue-950/40 hover:bg-blue-950/60 text-white font-medium flex items-center justify-center gap-2 rounded-xl transition-colors border border-blue-400/30 backdrop-blur-md"
+                 >
+                   <Download className="w-4 h-4" /> 批量下载转换结果
+                 </motion.button>
+               )}
+             </AnimatePresence>
+           </div>
+        </div>
       </motion.div>
     </div>
   )
